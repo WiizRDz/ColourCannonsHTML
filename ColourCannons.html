@@ -6,7 +6,7 @@
 
 	<body style="background: #000000;">
 
-		<canvas id="myCanvas" onmousedown="mouseClick(event, 'd')" onmousemove="mousePosition(event)" onmouseup="mouseClick(event, 'u')" onmousewheel="scrollWheel(event)" onmouseout="mouseout()" style="background: #000000; top = 0;	left = 0;"></canvas>
+		<canvas id="myCanvas" onmousedown="mouseClick(event, 'd')" onmousemove="mousePosition(event)" onmouseup="mouseClick(event, 'u')" onmousewheel="scrollWheel(event)" onmouseout="mouseout()" style="background: #000000; top = 0;	left = 0; cursor: none;"></canvas>
 
 	</body>
 
@@ -155,6 +155,7 @@ function mousePosition(e) {
 function drawChar () {
 	ctx.beginPath();
     ctx.rect(xa-12, ya-12, 10, 10);
+    ctx.strokeStyle = "#ffffff";
     ctx.stroke();
     ctx.closePath();
 }
