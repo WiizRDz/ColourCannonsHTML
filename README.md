@@ -2,7 +2,8 @@
 HTML Version of Colour Cannons
 ___
 ### How to run:
-  Download and run html file in browser, requires compatibility with HTML5 canvas
+  - Download and run html file in browser, requires compatibility with HTML5 canvas
+  - **OR** go to wiizrdz.github.io/ColourCannonsHTML/
   
 ### Controls
   - Mouse Click: Spawns in squares
