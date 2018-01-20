@@ -1,0 +1,270 @@
+<!doctypehtml>
+<html>
+	<head>
+		<title>Colour Cannons</title>
+	</head>
+
+	<body style="background: #000000;">
+
+		<canvas id="myCanvas" onmousedown="mouseClick(event, 'd')" onmousemove="mousePosition(event)" onmouseup="mouseClick(event, 'u')" onmousewheel="scrollWheel(event)" onmouseout="mouseout()" style="background: #000000; top = 0;	left = 0; cursor: none;"></canvas>
+
+	</body>
+
+	<script>
+
+var canvas = document.getElementById("myCanvas");
+var ctx = canvas.getContext("2d");
+var xa = window.innerWidth/2;
+var ya = window.innerHeight/2;
+var width = canvas.width;
+var height = canvas.height;
+var m_down = false;
+var row_num = 40;
+var side = 0;
+var inv = 0;
+var sq_size = 5;
+var sq_speed = 20;
+var outline = false;
+var draw_sq = [];
+var space = false;
+var r = 50
+var r1 = 1
+var g = 100
+var g1 = 2
+var b = 130
+var b1 = 4
+
+document.addEventListener("keydown", keyDownHandler, false);
+document.addEventListener("keyup", keyUpHandler, false);
+
+function keyDownHandler(e) {
+	if (e.keyCode == 87) {
+		// w
+		outline = !outline;
+	}
+	if (e.keyCode == 68) {
+		// d
+		row_num = 40;
+		side = 0;
+		inv = 0;
+		sq_size = 5;
+		sq_speed = 20;
+		outline = false;
+	}
+	if (e.keyCode == 73) {
+		// i
+		if (inv == 0) {
+			inv = -1;
+		}
+		if (inv == 255) {
+			inv = 0;
+		}
+		if (inv == -1) {
+			inv = 255;
+		}
+	}
+	if (e.keyCode == 49) {
+		// 1
+		side = 0;
+	}
+	if (e.keyCode == 50) {
+		// 2
+		side = 1;
+	}
+	if (e.keyCode == 51) {
+		// 3
+		side = 2;
+	}
+	if (e.keyCode == 52) {
+		// 4
+		side = 3;
+	}
+	if (e.keyCode == 38) {
+		// up
+		if (row_num < 50) {
+			row_num++;
+		}
+	}
+	if (e.keyCode == 40) {
+		// down
+		if (row_num > 5) {
+			row_num--;
+		}
+	}
+	if (e.keyCode == 32) {
+		// space
+		space = true;
+	}
+}
+
+function keyUpHandler(e) {
+	if (e.keyCode == 32) {
+		// space
+		space = false;
+	}
+}
+
+function mouseout() {
+	m_down = false;
+}
+
+function mouseClick(e,s) {
+	if (s == 'd') {
+		m_down = true;
+		//console.log('down');
+	}
+	if (s == 'u') {
+		m_down = false;
+		//console.log('up');
+	}
+}
+
+function scrollWheel(e) {
+	if (!space) {
+		if (e.wheelDelta > 0) {
+			if (sq_size < 50) {
+				sq_size++;
+			}
+		}
+		if (e.wheelDelta < 0) {
+			if (sq_size > 5) {
+				sq_size--;
+			}
+		}
+	}
+	else {
+		if (e.wheelDelta > 0) {
+			if (sq_speed < 20) {
+				sq_speed++;
+			}
+		}
+		if (e.wheelDelta < 0) {
+			if (sq_speed > 5) {
+				sq_speed--;
+			}
+		}
+	}
+}
+
+function mousePosition(e) {
+	xa = e.clientX;
+	ya = e.clientY;
+	//console.log('x = ', e.clientX, 'y = ', e.clientY);
+}
+
+function drawChar () {
+	ctx.beginPath();
+    ctx.rect(xa-12, ya-12, 10, 10);
+    ctx.strokeStyle = "#ffffff";
+    ctx.stroke();
+    ctx.closePath();
+}
+
+function findSpeed(x1, y1, x2, y2, _speed) {
+	xd = x1 - x2;
+	if (xd == 0) {
+		xd = Math.pow(10, -200);
+	}
+	yd = y1 - y2;
+	a = Math.atan2(yd, xd);
+	xs = _speed*Math.cos(a);
+	ys = _speed*Math.sin(a);
+	return [xs, ys]
+}
+
+class Square {
+	constructor(xloc, r, g, b) {
+		if (side == 0) {
+			this.x = xloc*(width/row_num);
+			this.y = height;
+		}
+		if (side == 1) {
+			this.x = 0;
+			this.y = xloc*(height/row_num);
+		}
+		if (side == 2) {
+			this.x = xloc*(width/row_num);
+			this.y = 0;
+		}
+		if (side == 3) {
+			this.x = width;
+			this.y = xloc*(height/row_num);
+		}
+
+		this.des = false;
+		this.r = Math.abs(inv-r);
+		this.g = Math.abs(inv-g);
+		this.b = Math.abs(inv-b);
+	}
+
+	update() {
+		if (this.x < -sq_size - 1 || this.x > width + sq_size + 1 || this.y < -sq_size - 1 || this.y > height + sq_size + 1) {//remove from list if square goes out of bounds
+			draw_sq.splice(draw_sq.indexOf(this), 1);
+		}
+		if (!this.des) {
+			var speed = findSpeed(xa - 8 - sq_size/2, ya - 8 - sq_size/2, this.x, this.y, sq_speed)
+			this.velox = speed[0];
+			this.veloy = speed[1];
+		}
+		if (xa-8-sq_size/2 + 50 > this.x && this.x > xa-8-sq_size/2 - 50 && ya-8-sq_size/2 + 50 > this.y && this.y > ya-8-sq_size/2 - 50) {
+			this.des = true;
+		}
+		this.x += this.velox;
+		this.y += this.veloy;
+		ctx.beginPath();
+		if (outline) {
+			ctx.rect(this.x, this.y, sq_size, sq_size);
+	    	ctx.strokeStyle = "rgb("+this.r+", "+this.g+", "+this.b+")";
+	    	ctx.stroke();
+		}
+		else {
+			ctx.rect(this.x, this.y, sq_size, sq_size);
+	    	ctx.fillStyle = "rgb("+this.r+", "+this.g+", "+this.b+")";
+	    	ctx.fill();
+		}
+	    ctx.closePath();
+	}
+}
+
+function changeColours() {
+	if (r > 250 || r < 50) {
+		r1 *= -1
+	}
+	if (g > 250 || g < 50) {
+		g1 *= -1
+	}
+	if (b > 250 || b < 50) {
+		b1 *= -1
+	}
+	r += r1
+	g += g1
+	b += b1
+}
+
+function update() {
+	if (canvas.width != window.innerWidth-20 || canvas.height != window.innerHeight-20) {
+		canvas.width = window.innerWidth-20;
+		canvas.height = window.innerHeight-20;
+		width = canvas.width;
+		height = canvas.height;
+	}
+	ctx.clearRect(0, 0, width, height);
+	if (m_down) {
+		changeColours();
+		for (i = 0; i <= row_num; i++) {
+			let sq = new Square(i, r, g, b);
+			draw_sq.push(sq);
+		}
+	}
+	for (i = 0; i <= draw_sq.length; i++) {
+		try{draw_sq[i].update();}
+		catch(TypeError){}
+	}
+	drawChar();
+}
+
+setInterval(update,10);
+
+</script>
+
+</html>
